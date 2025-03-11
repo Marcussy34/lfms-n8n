@@ -5,4 +5,9 @@
 *.txt
 
 # Ignore all PNG files
-*.png 
+*.png
+
+# Ignore contents of shared folder but keep the folder itself
+shared/*
+# Add this exception to keep the .gitkeep file
+!shared/.gitkeep 
