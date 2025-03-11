@@ -8,7 +8,7 @@ networks:
   demo:
 
 x-n8n: &service-n8n
-  image: n8nio/n8n:latest
+  build: .
   networks: ["demo"]
   environment:
     - DB_TYPE=postgresdb
@@ -86,13 +86,13 @@ services:
     hostname: n8n
     container_name: n8n
     restart: unless-stopped
-    entrypoint: ["/bin/sh", "-c", "apk add --no-cache poppler-utils && n8n"]
     ports:
       - 5678:5678
     volumes:
       - n8n_storage:/home/node/.n8n
       - ./n8n/backup:/backup
       - ./shared:/data/shared
+      - ./tessdata:/usr/share/tessdata
     depends_on:
       postgres:
         condition: service_healthy
