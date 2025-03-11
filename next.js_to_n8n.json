@@ -1,0 +1,298 @@
+{
+  "name": "Demo workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "ce8c3da4-899c-4cc4-af73-8096c64eec64",
+      "name": "Basic LLM Chain",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.3,
+      "position": [
+        180,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "model": "llama3.2:latest",
+        "options": {}
+      },
+      "id": "3dee878b-d748-4829-ac0a-cfd6705d31e5",
+      "name": "Ollama Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        300,
+        620
+      ],
+      "credentials": {
+        "ollamaApi": {
+          "id": "xHuYe0MDGOs9IpBW",
+          "name": "Local Ollama service"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/data/shared/{{$json[\"name\"]}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -960,
+        360
+      ],
+      "id": "b30c4c0d-5ab7-4eea-8b2b-fff7f9e353b8",
+      "name": "Download PDF to Disk"
+    },
+    {
+      "parameters": {
+        "command": "=pdftoppm -png \"/data/shared/{{$json.body.fileName}}\" \"/data/shared/{{$json.body.fileName.replace('.pdf', '')}}\"\n"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -340,
+        -100
+      ],
+      "id": "6c26ea20-c977-4cbc-ae48-ccaced5b0322",
+      "name": "Convert to PNG"
+    },
+    {
+      "parameters": {
+        "command": "=# Extract NAME from JSON\nNAME=\"{{ $json.name }}\"\nNAME=\"${NAME%.pdf}\"  # Remove .pdf extension\n\necho -e \"\\nExtracted Name: $NAME\\n\"\n\n# Loop through all matching PNG files\nfor file in /data/shared/\"${NAME}\"-*.png; do \n  [ -e \"$file\" ] || continue  # Skip if file doesn't exist\n\n  # Define output file without .txt (Tesseract adds it automatically)\n  output_txt=\"${file%.png}\"\n\n  echo \"Processing: $file -> ${output_txt}.txt\"\n\n  # Run Tesseract OCR\n  tesseract \"$file\" \"$output_txt\" --oem 3 --psm 6\n\n  echo \"Extracted text saved to: ${output_txt}.txt\"\ndone\n\necho -e \"\\n✅ OCR Processing Complete!\\n\"\n"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        0
+      ],
+      "id": "104debfc-b567-42a9-a6c4-a9e90f3ce62d",
+      "name": "PNG to Text"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2295dc22-9f7f-42c5-acc2-bd70232a93ee",
+              "name": "name",
+              "value": "={{ $json.body.fileName }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -340,
+        100
+      ],
+      "id": "88f9d3ad-d3b7-4601-ad36-905d4ce0e374",
+      "name": "Get PDF File Name"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "11ye2osXT_Ec3TAbMOqou48Re7KvTawUz",
+          "mode": "list",
+          "cachedResultName": "LFMS PDF Files",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/11ye2osXT_Ec3TAbMOqou48Re7KvTawUz"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1380,
+        360
+      ],
+      "id": "bf713f34-f8be-41fb-a04c-a1345fcc7a90",
+      "name": "File Uploaded to Drive",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "d7Jk1EnHqE29pAXd",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1160,
+        360
+      ],
+      "id": "a99aed1f-32b6-405a-87fc-ea4b1543cc78",
+      "name": "Download Newly Uploaded File",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "d7Jk1EnHqE29pAXd",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "3e0acb1f-2166-4481-8bf7-3734faccca90",
+        "options": {
+          "binaryPropertyName": "file"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -980,
+        -20
+      ],
+      "id": "6e509c69-4bad-4569-8449-79a967551c51",
+      "name": "Webhook",
+      "webhookId": "3e0acb1f-2166-4481-8bf7-3734faccca90"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/data/shared/{{ $json.body.fileName }}",
+        "dataPropertyName": "=file0",
+        "options": {
+          "append": false
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -680,
+        -20
+      ],
+      "id": "86dba72a-0215-4427-a426-95e08ca24577",
+      "name": "Download PDF to Local Disk"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download PDF to Disk": {
+      "main": [
+        []
+      ]
+    },
+    "Convert to PNG": {
+      "main": [
+        []
+      ]
+    },
+    "PNG to Text": {
+      "main": [
+        []
+      ]
+    },
+    "Get PDF File Name": {
+      "main": [
+        [
+          {
+            "node": "PNG to Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "File Uploaded to Drive": {
+      "main": [
+        [
+          {
+            "node": "Download Newly Uploaded File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Newly Uploaded File": {
+      "main": [
+        [
+          {
+            "node": "Download PDF to Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Download PDF to Local Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download PDF to Local Disk": {
+      "main": [
+        [
+          {
+            "node": "Convert to PNG",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get PDF File Name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "all",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "7916de6b-2a12-43b0-80fe-42ffe2972929",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
+  },
+  "id": "srOnR8PAY3u4RSwb",
+  "tags": []
+}
