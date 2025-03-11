@@ -2,35 +2,23 @@
   "name": "Demo workflow",
   "nodes": [
     {
-      "parameters": {},
+      "parameters": {
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a precise document analyzer specializing in banking and legal documents. Your task is to:  1️⃣ Correct any OCR errors in the text. 2️⃣ Extract the corrected information into the specified JSON structure.  🛠 **OCR Correction Rules:** - Fix common OCR mistakes (e.g., \"Bark\" → \"Bank\", \"aun\" → \"sum\"). - Interpret banking terms correctly (e.g., \"Base Lending Rate\", \"Letter of Offer\"). - Remove scanning artifacts (~, =, extra spaces, and watermarks). - Ensure correct spelling and format (e.g., RM42,500,000.00 for amounts).  📌 **Rules for JSON output:** - Return **only valid JSON** (no explanations or extra text). - Use **empty strings (\"\")** for missing/unclear data. - **Format dates** as `YYYY-MM-DD`. - **Format currency** properly (e.g., RM 50,000.00). - **Follow schema strictly** - do not modify fields. - **Ensure proper JSON syntax**.  📜 **Text for analysis:**   {{ $json.cleanedText }}  🚀 **Respond only with a structured JSON output like this:** ```json {     \"detail_loans\": {         \"case_detail_id\": 123,         \"bank_name\": \"ABC Bank\",         \"earnest_deposit\": 50000.00,         \"earnest_deposit_print_as\": \"RM 50,000\",         \"earnest_deposit_in_word\": \"Fifty Thousand Ringgit\",         \"amount\": 250000.00,         \"amount_print_as\": \"RM 250,000\",         \"amount_in_word\": \"Two Hundred Fifty Thousand Ringgit\",         \"deposit\": 10000.00,         \"deposit_print_as\": \"RM 10,000\",         \"deposit_in_word\": \"Ten Thousand Ringgit\",         \"mrta_amount\": 1200.00,         \"mrta_amount_print_as\": \"RM 1,200\",         \"mrta_amount_in_word\": \"One Thousand Two Hundred Ringgit\",         \"balance\": 240000.00,         \"balance_print_as\": \"RM 240,000\",         \"balance_in_word\": \"Two Hundred Forty Thousand Ringgit\"     },     \"detail_properties\": {         \"case_detail_id\": 123,         \"description\": \"Double-story house\",         \"title\": \"Lot 1234\",         \"title_description\": \"Freehold property\",         \"type\": \"Residential\",         \"category\": \"Landed\",         \"price\": 500000.00,         \"price_print_as\": \"RM 500,000\",         \"price_in_word\": \"Five Hundred Thousand Ringgit\",         \"total_land_area\": 2000.00,         \"land_area\": 1800.00,         \"build_up_area\": 1500.00,         \"area_unit\": \"Square Feet\",         \"residential_area\": \"Taman Indah\",         \"HSD_No\": \"HSD1234\",         \"PTD_No\": \"PTD5678\",         \"Parcel_No\": \"P-45\",         \"Storey_No\": \"2\",         \"Unit_No\": \"12A\",         \"Car_Park_No\": \"CP-15\",         \"address\": \"123, Jalan Indah, Kuala Lumpur\",         \"district\": \"Kuala Lumpur\",         \"sub_district\": \"Ampang\",         \"state\": \"Wilayah Persekutuan\",         \"land_office\": \"Kuala Lumpur Land Office\",         \"tenure\": \"Freehold\"     } }"
+            }
+          ]
+        }
+      },
       "id": "ce8c3da4-899c-4cc4-af73-8096c64eec64",
       "name": "Basic LLM Chain",
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.3,
       "position": [
-        180,
-        200
+        480,
+        0
       ]
-    },
-    {
-      "parameters": {
-        "model": "llama3.2:latest",
-        "options": {}
-      },
-      "id": "3dee878b-d748-4829-ac0a-cfd6705d31e5",
-      "name": "Ollama Chat Model",
-      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
-      "typeVersion": 1,
-      "position": [
-        300,
-        620
-      ],
-      "credentials": {
-        "ollamaApi": {
-          "id": "xHuYe0MDGOs9IpBW",
-          "name": "Local Ollama service"
-        }
-      }
     },
     {
       "parameters": {
@@ -41,8 +29,8 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1,
       "position": [
-        -960,
-        360
+        -1280,
+        540
       ],
       "id": "b30c4c0d-5ab7-4eea-8b2b-fff7f9e353b8",
       "name": "Download PDF to Disk"
@@ -67,7 +55,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -60,
+        -120,
         0
       ],
       "id": "104debfc-b567-42a9-a6c4-a9e90f3ce62d",
@@ -119,8 +107,8 @@
       "type": "n8n-nodes-base.googleDriveTrigger",
       "typeVersion": 1,
       "position": [
-        -1380,
-        360
+        -1700,
+        540
       ],
       "id": "bf713f34-f8be-41fb-a04c-a1345fcc7a90",
       "name": "File Uploaded to Drive",
@@ -144,8 +132,8 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        -1160,
-        360
+        -1480,
+        540
       ],
       "id": "a99aed1f-32b6-405a-87fc-ea4b1543cc78",
       "name": "Download Newly Uploaded File",
@@ -160,6 +148,7 @@
       "parameters": {
         "httpMethod": "POST",
         "path": "3e0acb1f-2166-4481-8bf7-3734faccca90",
+        "responseMode": "responseNode",
         "options": {
           "binaryPropertyName": "file"
         }
@@ -191,21 +180,73 @@
       ],
       "id": "86dba72a-0215-4427-a426-95e08ca24577",
       "name": "Download PDF to Local Disk"
+    },
+    {
+      "parameters": {
+        "jsCode": "const files = $input.all();\nlet combinedText = \"\";\n\nfor (const file of files) {\n    if (file.binary && file.binary.data) {\n        // Extract the Base64 encoded text content\n        const base64Text = file.binary.data.data;  \n        \n        // Decode Base64 to UTF-8 text\n        const textData = Buffer.from(base64Text, \"base64\").toString(\"utf-8\");  \n\n        combinedText += textData + \"\\n\\n\";  // Merge files with spacing\n    }\n}\n\n// Pass the decoded text to the next node\nreturn [{ json: { chatInput: combinedText } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        280,
+        0
+      ],
+      "id": "19b7633d-4ea0-4124-93b9-4ac5f753509b",
+      "name": "ChatInput"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/data/shared/*.txt",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        100,
+        0
+      ],
+      "id": "588872fe-888c-4dd6-9817-d4498f996832",
+      "name": "Read Text"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        860,
+        0
+      ],
+      "id": "46fc3efb-7843-41fd-ae68-03fccc39026b",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "model": "mistral:latest",
+        "options": {
+          "format": "json"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmOllama",
+      "typeVersion": 1,
+      "position": [
+        380,
+        240
+      ],
+      "id": "96a43581-828c-4a71-a43c-ed3b0f209dc3",
+      "name": "Ollama Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "xHuYe0MDGOs9IpBW",
+          "name": "Local Ollama service"
+        }
+      }
     }
   ],
   "pinData": {},
   "connections": {
-    "Ollama Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Basic LLM Chain",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Download PDF to Disk": {
       "main": [
         []
@@ -218,7 +259,13 @@
     },
     "PNG to Text": {
       "main": [
-        []
+        [
+          {
+            "node": "Read Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Get PDF File Name": {
@@ -280,6 +327,50 @@
           }
         ]
       ]
+    },
+    "ChatInput": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Text": {
+      "main": [
+        [
+          {
+            "node": "ChatInput",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -288,7 +379,7 @@
     "saveDataSuccessExecution": "all",
     "callerPolicy": "workflowsFromSameOwner"
   },
-  "versionId": "7916de6b-2a12-43b0-80fe-42ffe2972929",
+  "versionId": "e6a870a7-6363-45dd-b05b-a27b55fbfe58",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
