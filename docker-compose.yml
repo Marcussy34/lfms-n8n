@@ -71,7 +71,8 @@ services:
       - "-c"
       - "n8n import:credentials --separate --input=/backup/credentials && n8n import:workflow --separate --input=/backup/workflows"
     volumes:
-      - ./n8n/backup:/backup
+      - "C:/Users/Marcus/Desktop/shared:/data/shared"
+      - "C:/Users/Marcus/Desktop/n8n-data:/home/node/.n8n"
     depends_on:
       postgres:
         condition: service_healthy
