@@ -9,7 +9,7 @@ networks:
 
 x-n8n: &service-n8n
   image: n8nio/n8n:latest
-  networks: ['demo']
+  networks: ["demo"]
   environment:
     - DB_TYPE=postgresdb
     - DB_POSTGRESDB_HOST=postgres
@@ -24,7 +24,7 @@ x-n8n: &service-n8n
 x-ollama: &service-ollama
   image: ollama/ollama:latest
   container_name: ollama
-  networks: ['demo']
+  networks: ["demo"]
   restart: unless-stopped
   ports:
     - 11434:11434
@@ -33,7 +33,7 @@ x-ollama: &service-ollama
 
 x-init-ollama: &init-ollama
   image: ollama/ollama:latest
-  networks: ['demo']
+  networks: ["demo"]
   container_name: ollama-pull-llama
   volumes:
     - ollama_storage:/root/.ollama
@@ -48,7 +48,7 @@ services:
   postgres:
     image: postgres:16-alpine
     hostname: postgres
-    networks: ['demo']
+    networks: ["demo"]
     restart: unless-stopped
     environment:
       - POSTGRES_USER
@@ -57,7 +57,11 @@ services:
     volumes:
       - postgres_storage:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -h localhost -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -h localhost -U ${POSTGRES_USER} -d ${POSTGRES_DB}",
+        ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -71,8 +75,8 @@ services:
       - "-c"
       - "n8n import:credentials --separate --input=/backup/credentials && n8n import:workflow --separate --input=/backup/workflows"
     volumes:
-      - "C:/Users/Marcus/Desktop/shared:/data/shared"
-      - "C:/Users/Marcus/Desktop/n8n-data:/home/node/.n8n"
+      - "./shared:/data/shared"
+      - "./n8n-data:/home/node/.n8n"
     depends_on:
       postgres:
         condition: service_healthy
@@ -82,6 +86,7 @@ services:
     hostname: n8n
     container_name: n8n
     restart: unless-stopped
+    entrypoint: ["/bin/sh", "-c", "apk add --no-cache poppler-utils && n8n"]
     ports:
       - 5678:5678
     volumes:
@@ -98,7 +103,7 @@ services:
     image: qdrant/qdrant
     hostname: qdrant
     container_name: qdrant
-    networks: ['demo']
+    networks: ["demo"]
     restart: unless-stopped
     ports:
       - 6333:6333
@@ -145,4 +150,4 @@ services:
     <<: *init-ollama
     image: ollama/ollama:rocm
     depends_on:
-     - ollama-gpu-amd
+      - ollama-gpu-amd
