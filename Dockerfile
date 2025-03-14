@@ -10,7 +10,8 @@ RUN apk add --no-cache \
     poppler-utils \
     tesseract-ocr-data-eng \
     && mkdir -p /usr/share/tessdata \
+    && wget -O /usr/share/tessdata/eng.traineddata https://github.com/tesseract-ocr/tessdata/raw/main/eng.traineddata \
     && wget -O /usr/share/tessdata/msa.traineddata https://github.com/tesseract-ocr/tessdata/raw/main/msa.traineddata
 
 # Switch back to the default n8n user
-USER node 
+USER node
