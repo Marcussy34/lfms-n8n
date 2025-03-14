@@ -440,6 +440,10 @@ def process_all_documents(directory, output_file=None):
     results = {}
     
     for file_name in os.listdir(directory):
+        # Skip requirements.txt file
+        if file_name == "requirements.txt":
+            continue
+            
         if file_name.endswith('.txt'):
             file_path = os.path.join(directory, file_name)
             print(f"Processing {file_path}...")
