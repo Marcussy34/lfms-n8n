@@ -10,4 +10,7 @@
 # Ignore contents of shared folder but keep the folder itself
 shared/*
 # Add this exception to keep the .gitkeep file
-!shared/.gitkeep 
+!shared/.gitkeep
+# Add exceptions for extract_entities.py and requirements.txt
+!shared/extract_entities.py
+!shared/requirements.txt 
