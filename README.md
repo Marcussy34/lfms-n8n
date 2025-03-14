@@ -92,19 +92,23 @@ python extract_entities.py path/to/directory/ output.json
 
 ### Complete Workflow Example
 
-1. Use a **Read Binary File** or **HTTP Request** node to obtain a PDF document
+1. Use a **Webhook** node to receive PDF documents
 2. Save the PDF to `/data/shared/document.pdf` with a **Write Binary File** node
-3. Run OCR on the PDF using Tesseract:
+3. Convert the PDF to PNG images using pdftoppm:
    ```
-   tesseract /data/shared/document.pdf /data/shared/input -l eng
+   pdftoppm -png /data/shared/document.pdf /data/shared/document
    ```
-4. Execute the NER extraction:
+4. Run OCR on the PNG images using Tesseract:
+   ```
+   tesseract /data/shared/document-1.png /data/shared/input -l eng
+   ```
+5. Execute the NER extraction on the extracted text:
    ```
    /opt/venv/bin/python /data/shared/extract_entities.py /data/shared/input.txt /data/shared/output.json
    ```
-5. Read the output JSON file with a **Read Binary File** node
-6. Parse the extracted data with a **JSON Parse** node
-7. Process the data as needed (e.g., insert into a database)
+6. Read the output JSON file with a **Read Binary File** node
+7. Parse the extracted data with a **JSON Parse** node
+8. Process the data as needed (e.g., insert into a database)
 
 ## Customization
 
