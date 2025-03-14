@@ -1,40 +1,6 @@
 {
-  "name": "Demo workflow",
+  "name": "My workflow",
   "nodes": [
-    {
-      "parameters": {
-        "messages": {
-          "messageValues": [
-            {
-              "message": "You are a precise document analyzer specializing in banking and legal documents. Your task is to:  1️⃣ Correct any OCR errors in the text. 2️⃣ Extract the corrected information into the specified JSON structure.  🛠 **OCR Correction Rules:** - Fix common OCR mistakes (e.g., \"Bark\" → \"Bank\", \"aun\" → \"sum\"). - Interpret banking terms correctly (e.g., \"Base Lending Rate\", \"Letter of Offer\"). - Remove scanning artifacts (~, =, extra spaces, and watermarks). - Ensure correct spelling and format (e.g., RM42,500,000.00 for amounts).  📌 **Rules for JSON output:** - Return **only valid JSON** (no explanations or extra text). - Use **empty strings (\"\")** for missing/unclear data. - **Format dates** as `YYYY-MM-DD`. - **Format currency** properly (e.g., RM 50,000.00). - **Follow schema strictly** - do not modify fields. - **Ensure proper JSON syntax**.  📜 **Text for analysis:**   {{ $json.cleanedText }}  🚀 **Respond only with a structured JSON output like this:** ```json {     \"detail_loans\": {         \"case_detail_id\": 123,         \"bank_name\": \"ABC Bank\",         \"earnest_deposit\": 50000.00,         \"earnest_deposit_print_as\": \"RM 50,000\",         \"earnest_deposit_in_word\": \"Fifty Thousand Ringgit\",         \"amount\": 250000.00,         \"amount_print_as\": \"RM 250,000\",         \"amount_in_word\": \"Two Hundred Fifty Thousand Ringgit\",         \"deposit\": 10000.00,         \"deposit_print_as\": \"RM 10,000\",         \"deposit_in_word\": \"Ten Thousand Ringgit\",         \"mrta_amount\": 1200.00,         \"mrta_amount_print_as\": \"RM 1,200\",         \"mrta_amount_in_word\": \"One Thousand Two Hundred Ringgit\",         \"balance\": 240000.00,         \"balance_print_as\": \"RM 240,000\",         \"balance_in_word\": \"Two Hundred Forty Thousand Ringgit\"     },     \"detail_properties\": {         \"case_detail_id\": 123,         \"description\": \"Double-story house\",         \"title\": \"Lot 1234\",         \"title_description\": \"Freehold property\",         \"type\": \"Residential\",         \"category\": \"Landed\",         \"price\": 500000.00,         \"price_print_as\": \"RM 500,000\",         \"price_in_word\": \"Five Hundred Thousand Ringgit\",         \"total_land_area\": 2000.00,         \"land_area\": 1800.00,         \"build_up_area\": 1500.00,         \"area_unit\": \"Square Feet\",         \"residential_area\": \"Taman Indah\",         \"HSD_No\": \"HSD1234\",         \"PTD_No\": \"PTD5678\",         \"Parcel_No\": \"P-45\",         \"Storey_No\": \"2\",         \"Unit_No\": \"12A\",         \"Car_Park_No\": \"CP-15\",         \"address\": \"123, Jalan Indah, Kuala Lumpur\",         \"district\": \"Kuala Lumpur\",         \"sub_district\": \"Ampang\",         \"state\": \"Wilayah Persekutuan\",         \"land_office\": \"Kuala Lumpur Land Office\",         \"tenure\": \"Freehold\"     } }"
-            }
-          ]
-        }
-      },
-      "id": "ce8c3da4-899c-4cc4-af73-8096c64eec64",
-      "name": "Basic LLM Chain",
-      "type": "@n8n/n8n-nodes-langchain.chainLlm",
-      "typeVersion": 1.3,
-      "position": [
-        480,
-        0
-      ]
-    },
-    {
-      "parameters": {
-        "operation": "write",
-        "fileName": "=/data/shared/{{$json[\"name\"]}}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.readWriteFile",
-      "typeVersion": 1,
-      "position": [
-        -1280,
-        540
-      ],
-      "id": "b30c4c0d-5ab7-4eea-8b2b-fff7f9e353b8",
-      "name": "Download PDF to Disk"
-    },
     {
       "parameters": {
         "command": "=pdftoppm -png \"/data/shared/{{$json.body.fileName}}\" \"/data/shared/{{$json.body.fileName.replace('.pdf', '')}}\"\n"
@@ -42,10 +8,10 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -340,
-        -100
+        0,
+        0
       ],
-      "id": "6c26ea20-c977-4cbc-ae48-ccaced5b0322",
+      "id": "618a2ee5-2da9-414e-a56f-6e172af32e46",
       "name": "Convert to PNG"
     },
     {
@@ -55,10 +21,10 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -120,
-        0
+        220,
+        100
       ],
-      "id": "104debfc-b567-42a9-a6c4-a9e90f3ce62d",
+      "id": "49caf266-c477-47eb-bc91-ce6ed0980418",
       "name": "PNG to Text"
     },
     {
@@ -78,77 +44,16 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -340,
-        100
+        0,
+        200
       ],
-      "id": "88f9d3ad-d3b7-4601-ad36-905d4ce0e374",
+      "id": "d018dba9-3140-4e54-af42-9ef5547c4fa1",
       "name": "Get PDF File Name"
-    },
-    {
-      "parameters": {
-        "pollTimes": {
-          "item": [
-            {
-              "mode": "everyMinute"
-            }
-          ]
-        },
-        "triggerOn": "specificFolder",
-        "folderToWatch": {
-          "__rl": true,
-          "value": "11ye2osXT_Ec3TAbMOqou48Re7KvTawUz",
-          "mode": "list",
-          "cachedResultName": "LFMS PDF Files",
-          "cachedResultUrl": "https://drive.google.com/drive/folders/11ye2osXT_Ec3TAbMOqou48Re7KvTawUz"
-        },
-        "event": "fileCreated",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.googleDriveTrigger",
-      "typeVersion": 1,
-      "position": [
-        -1700,
-        540
-      ],
-      "id": "bf713f34-f8be-41fb-a04c-a1345fcc7a90",
-      "name": "File Uploaded to Drive",
-      "credentials": {
-        "googleDriveOAuth2Api": {
-          "id": "d7Jk1EnHqE29pAXd",
-          "name": "Google Drive account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "download",
-        "fileId": {
-          "__rl": true,
-          "value": "={{ $json.id }}",
-          "mode": "id"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.googleDrive",
-      "typeVersion": 3,
-      "position": [
-        -1480,
-        540
-      ],
-      "id": "a99aed1f-32b6-405a-87fc-ea4b1543cc78",
-      "name": "Download Newly Uploaded File",
-      "credentials": {
-        "googleDriveOAuth2Api": {
-          "id": "d7Jk1EnHqE29pAXd",
-          "name": "Google Drive account"
-        }
-      }
     },
     {
       "parameters": {
         "httpMethod": "POST",
         "path": "3e0acb1f-2166-4481-8bf7-3734faccca90",
-        "responseMode": "responseNode",
         "options": {
           "binaryPropertyName": "file"
         }
@@ -156,10 +61,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        -980,
-        -20
+        -640,
+        80
       ],
-      "id": "6e509c69-4bad-4569-8449-79a967551c51",
+      "id": "91d0a0a2-5a2b-4911-80e8-f31ad036700c",
       "name": "Webhook",
       "webhookId": "3e0acb1f-2166-4481-8bf7-3734faccca90"
     },
@@ -175,38 +80,11 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1,
       "position": [
-        -680,
-        -20
+        -340,
+        80
       ],
-      "id": "86dba72a-0215-4427-a426-95e08ca24577",
+      "id": "1dac3d9f-2ea3-493c-a5f1-c46810af8cbd",
       "name": "Download PDF to Local Disk"
-    },
-    {
-      "parameters": {
-        "jsCode": "const files = $input.all();\nlet combinedText = \"\";\n\nfor (const file of files) {\n    if (file.binary && file.binary.data) {\n        // Extract the Base64 encoded text content\n        const base64Text = file.binary.data.data;  \n        \n        // Decode Base64 to UTF-8 text\n        const textData = Buffer.from(base64Text, \"base64\").toString(\"utf-8\");  \n\n        combinedText += textData + \"\\n\\n\";  // Merge files with spacing\n    }\n}\n\n// Pass the decoded text to the next node\nreturn [{ json: { chatInput: combinedText } }];\n"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        280,
-        0
-      ],
-      "id": "19b7633d-4ea0-4124-93b9-4ac5f753509b",
-      "name": "ChatInput"
-    },
-    {
-      "parameters": {
-        "fileSelector": "/data/shared/*.txt",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.readWriteFile",
-      "typeVersion": 1,
-      "position": [
-        100,
-        0
-      ],
-      "id": "588872fe-888c-4dd6-9817-d4498f996832",
-      "name": "Read Text"
     },
     {
       "parameters": {
@@ -216,52 +94,74 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        860,
-        0
+        1620,
+        200
       ],
-      "id": "46fc3efb-7843-41fd-ae68-03fccc39026b",
+      "id": "fe3b1a13-69c4-46f4-853d-e60847ea791a",
       "name": "Respond to Webhook"
     },
     {
       "parameters": {
-        "model": "mistral:latest",
-        "options": {
-          "format": "json"
-        }
+        "command": "=ls /data/shared/\"$(basename -- {{ $('Get PDF File Name').item.json.name }} .pdf)\"-*.txt\n"
       },
-      "type": "@n8n/n8n-nodes-langchain.lmOllama",
+      "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        380,
-        240
+        420,
+        40
       ],
-      "id": "96a43581-828c-4a71-a43c-ed3b0f209dc3",
-      "name": "Ollama Model",
-      "credentials": {
-        "ollamaApi": {
-          "id": "xHuYe0MDGOs9IpBW",
-          "name": "Local Ollama service"
-        }
-      }
+      "id": "1e142ff2-928d-43e8-872f-485612c51d48",
+      "name": "Get Matching TXT Files"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Split the stdout output into an array of file paths\nconst filePaths = $json[\"stdout\"].split(\"\\n\");\n\n// Return an array of objects, one per file path\nreturn filePaths.map(path => ({ json: { filePath: path.trim() } }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        600,
+        40
+      ],
+      "id": "60782b0f-53c7-408d-a35b-79fbdc5fd409",
+      "name": "Process TXT File Paths"
+    },
+    {
+      "parameters": {
+        "jsCode": "const files = $input.all();\nlet combinedText = \"\";\n\nfor (const file of files) {\n    if (file.binary && file.binary.data) {\n        // Extract the Base64 encoded text content\n        const base64Text = file.binary.data.data;  \n        \n        // Decode Base64 to UTF-8 text\n        const textData = Buffer.from(base64Text, \"base64\").toString(\"utf-8\");  \n\n        combinedText += textData + \"\\n\\n\";  // Merge files with spacing\n    }\n}\n\n// Pass the decoded text to the next node\nreturn [{ json: { chatInput: combinedText } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        980,
+        40
+      ],
+      "id": "9bb69481-adf1-44fc-8767-fedad5f56f0e",
+      "name": "Group TXT Files"
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $json.filePath }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        780,
+        40
+      ],
+      "id": "83f3cd52-f387-47f0-ba8e-7ad755e42906",
+      "name": "Read TXT File",
+      "alwaysOutputData": false
     }
   ],
   "pinData": {},
   "connections": {
-    "Download PDF to Disk": {
-      "main": [
-        []
-      ]
-    },
-    "Convert to PNG": {
-      "main": [
-        []
-      ]
-    },
     "PNG to Text": {
       "main": [
         [
           {
-            "node": "Read Text",
+            "node": "Get Matching TXT Files",
             "type": "main",
             "index": 0
           }
@@ -273,28 +173,6 @@
         [
           {
             "node": "PNG to Text",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "File Uploaded to Drive": {
-      "main": [
-        [
-          {
-            "node": "Download Newly Uploaded File",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Download Newly Uploaded File": {
-      "main": [
-        [
-          {
-            "node": "Download PDF to Disk",
             "type": "main",
             "index": 0
           }
@@ -328,62 +206,59 @@
         ]
       ]
     },
-    "ChatInput": {
+    "Respond to Webhook": {
+      "main": [
+        []
+      ]
+    },
+    "Get Matching TXT Files": {
       "main": [
         [
           {
-            "node": "Basic LLM Chain",
+            "node": "Process TXT File Paths",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Read Text": {
+    "Process TXT File Paths": {
       "main": [
         [
           {
-            "node": "ChatInput",
+            "node": "Read TXT File",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Basic LLM Chain": {
+    "Group TXT Files": {
+      "main": [
+        []
+      ]
+    },
+    "Read TXT File": {
       "main": [
         [
           {
-            "node": "Respond to Webhook",
+            "node": "Group TXT Files",
             "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Ollama Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Basic LLM Chain",
-            "type": "ai_languageModel",
             "index": 0
           }
         ]
       ]
     }
   },
-  "active": true,
+  "active": false,
   "settings": {
-    "executionOrder": "v1",
-    "saveDataSuccessExecution": "all",
-    "callerPolicy": "workflowsFromSameOwner"
+    "executionOrder": "v1"
   },
-  "versionId": "e6a870a7-6363-45dd-b05b-a27b55fbfe58",
+  "versionId": "e0988bc1-9d15-4b08-91ff-cdbe567021a3",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
   },
-  "id": "srOnR8PAY3u4RSwb",
+  "id": "0ZshLJpbOnQU6fzG",
   "tags": []
 }
