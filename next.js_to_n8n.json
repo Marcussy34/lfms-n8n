@@ -94,8 +94,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        1620,
-        200
+        1600,
+        120
       ],
       "id": "fe3b1a13-69c4-46f4-853d-e60847ea791a",
       "name": "Respond to Webhook"
@@ -133,7 +133,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        980,
+        960,
         40
       ],
       "id": "9bb69481-adf1-44fc-8767-fedad5f56f0e",
@@ -153,6 +153,47 @@
       "id": "83f3cd52-f387-47f0-ba8e-7ad755e42906",
       "name": "Read TXT File",
       "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "command": "=/opt/venv/bin/python /data/shared/extract_entities.py /data/shared /data/shared/output_{{ $json.newFileName }}.json"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        40
+      ],
+      "id": "7b6b02c5-9910-4078-b3d1-8b41c559f1d6",
+      "name": "Execute Command"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "={{ $('Read TXT File').item.json.fileName }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1720,
+        -400
+      ],
+      "id": "ae88ab2c-a4b8-4d55-b120-4d69c7cc10b7",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "jsCode": "const fileName = $('Webhook').first().json.body.fileName;\nconst newFileName = fileName.replace(/\\.[^.]+$/, ''); // Removes the file extension\n\nreturn {\n  newFileName\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        40
+      ],
+      "id": "79a5eb35-040d-460a-95b2-6d3ac61a2b06",
+      "name": "Code"
     }
   ],
   "pinData": {},
@@ -235,7 +276,13 @@
     },
     "Group TXT Files": {
       "main": [
-        []
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Read TXT File": {
@@ -248,13 +295,29 @@
           }
         ]
       ]
+    },
+    "Execute Command": {
+      "main": [
+        []
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "e0988bc1-9d15-4b08-91ff-cdbe567021a3",
+  "versionId": "b727768d-9cf7-4dec-9ff1-bd4c95775b4c",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
